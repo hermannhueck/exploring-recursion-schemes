@@ -43,7 +43,13 @@ inThisBuild(
 )
 
 lazy val root = (project in file("."))
-  .aggregate(core, `olikitty-fby-examples`, `my-recursion-impl`, `exploring-matryoshka`, `exploring-droste`)
+  .aggregate(
+    core,
+    `olikitty-fby-examples`,
+    `recursion-scheme-implementations`,
+    `exploring-matryoshka`,
+    `exploring-droste`
+  )
   .settings(
     name := projectName,
     description := projectDescription,
@@ -74,14 +80,14 @@ lazy val `olikitty-fby-examples` = (project in file("olikitty-fby-examples"))
     libraryDependencies ++= Seq(fs2Io)
   )
 
-lazy val `my-recursion-impl` = (project in file("my-recursion-impl"))
+lazy val `recursion-scheme-implementations` = (project in file("recursion-scheme-implementations"))
   .dependsOn(compat213, util)
   .settings(
-    name := "my-recursion-impl",
-    description := "My own impl of recursion schemes",
+    name := "recursion-scheme-implementations",
+    description := "Demo implementations of recursion schemes",
     scalacOptions ++= scalacOptionsFor(scalaVersion.value),
     console / scalacOptions := removeScalacOptionXlintUnusedForConsoleFrom(scalacOptions.value),
-    libraryDependencies ++= Seq(fs2Io)
+    libraryDependencies ++= Seq(fs2Io, matryoshkaCore)
   )
 
 lazy val `exploring-matryoshka` = (project in file("exploring-matryoshka"))
