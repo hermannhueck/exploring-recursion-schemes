@@ -86,8 +86,7 @@ lazy val `recursion-scheme-implementations` = (project in file("recursion-scheme
     name := "recursion-scheme-implementations",
     description := "Demo implementations of recursion schemes",
     scalacOptions ++= scalacOptionsFor(scalaVersion.value),
-    console / scalacOptions := removeScalacOptionXlintUnusedForConsoleFrom(scalacOptions.value),
-    libraryDependencies ++= Seq(fs2Io, matryoshkaCore)
+    console / scalacOptions := removeScalacOptionXlintUnusedForConsoleFrom(scalacOptions.value)
   )
 
 lazy val `exploring-matryoshka` = (project in file("exploring-matryoshka"))
