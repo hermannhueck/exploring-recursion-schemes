@@ -1,4 +1,4 @@
-package github
+package githubmatryoshka
 
 import scala.util.chaining._
 
