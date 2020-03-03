@@ -1,3 +1,4 @@
+package my
 package functor
 
 trait Functor[F[_]] {

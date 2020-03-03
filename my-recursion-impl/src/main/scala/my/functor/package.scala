@@ -1,3 +1,5 @@
+package my
+
 package object functor {
 
   final implicit class FunctorSyntax[F[_]: Functor, A](private val fa: F[A]) {

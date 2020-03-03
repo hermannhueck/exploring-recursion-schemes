@@ -1,3 +1,5 @@
+package my
+
 package object recursion { self =>
 
   import fixpoint.Fix

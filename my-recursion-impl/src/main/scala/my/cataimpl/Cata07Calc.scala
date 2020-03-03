@@ -1,4 +1,5 @@
-package my.cataimpl
+package my
+package cataimpl
 
 import scala.util.chaining._
 import fixpoint.Fix
@@ -6,23 +7,23 @@ import functor._
 
 object Cata07Calc extends util.App {
 
-  import Calc.{Add, Mult, Num}
+  import Calc.{Add, Mul, Num}
 
   sealed trait Calc[+A] extends Product with Serializable {
 
     def map[B](f: A => B): Calc[B] =
       this match {
-        case Num(i)     => Num(i)
-        case Add(a, b)  => Add(f(a), f(b))
-        case Mult(a, b) => Mult(f(a), f(b))
+        case Num(i)    => Num(i)
+        case Add(a, b) => Add(f(a), f(b))
+        case Mul(a, b) => Mul(f(a), f(b))
       }
   }
 
   object Calc {
 
-    case class Num[A](i: Int)      extends Calc[A]
-    case class Add[A](a: A, b: A)  extends Calc[A]
-    case class Mult[A](a: A, b: A) extends Calc[A]
+    case class Num[A](i: Int)     extends Calc[A]
+    case class Add[A](a: A, b: A) extends Calc[A]
+    case class Mul[A](a: A, b: A) extends Calc[A]
 
     implicit val functor: Functor[Calc] = new Functor[Calc] {
       override def map[A, B](fa: Calc[A])(f: A => B): Calc[B] =
@@ -30,7 +31,7 @@ object Cata07Calc extends util.App {
     }
   }
 
-  import Calc.{Add, Mult, Num}
+  import Calc.{Add, Mul, Num}
 
   // FORMAT: OFF
   // 1 + 2
@@ -42,7 +43,7 @@ object Cata07Calc extends util.App {
 
   // 3 * (1 + 2)
   val calc2: Fix[Calc] =
-    Fix(Mult(
+    Fix(Mul(
         Fix(Num[Fix[Calc]](3)),
         Fix(Add(
             Fix(Num[Fix[Calc]](1)),
@@ -55,15 +56,15 @@ object Cata07Calc extends util.App {
   type Coalgebra[F[_], A] = A => F[A]
 
   val eval: Algebra[Calc, Int] = {
-    case Num(i)     => i
-    case Add(a, b)  => a + b
-    case Mult(a, b) => a * b
+    case Num(i)    => i
+    case Add(a, b) => a + b
+    case Mul(a, b) => a * b
   }
 
   val show: Algebra[Calc, String] = {
-    case Num(i)     => i.toString
-    case Add(a, b)  => s"($a + $b)"
-    case Mult(a, b) => s"$a * $b"
+    case Num(i)    => i.toString
+    case Add(a, b) => s"($a + $b)"
+    case Mul(a, b) => s"$a * $b"
   }
 
   def cata[F[_]: Functor, A](algebra: Algebra[F, A])(fixedData: Fix[F]): A = {

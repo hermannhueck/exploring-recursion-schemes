@@ -1,4 +1,5 @@
-package my.cataimpl
+package my
+package cataimpl
 
 import scala.util.chaining._
 import fixpoint.Fix
@@ -8,21 +9,21 @@ object Cata05Calc extends util.App {
 
   sealed trait Calc[+A] extends Product with Serializable {
 
-    import Calc.{Add, Mult, Num}
+    import Calc.{Add, Mul, Num}
 
     def map[B](f: A => B): Calc[B] =
       this match {
-        case Num(i)     => Num(i)
-        case Add(a, b)  => Add(f(a), f(b))
-        case Mult(a, b) => Mult(f(a), f(b))
+        case Num(i)    => Num(i)
+        case Add(a, b) => Add(f(a), f(b))
+        case Mul(a, b) => Mul(f(a), f(b))
       }
   }
 
   object Calc {
 
-    case class Num[A](i: Int)      extends Calc[A]
-    case class Add[A](a: A, b: A)  extends Calc[A]
-    case class Mult[A](a: A, b: A) extends Calc[A]
+    case class Num[A](i: Int)     extends Calc[A]
+    case class Add[A](a: A, b: A) extends Calc[A]
+    case class Mul[A](a: A, b: A) extends Calc[A]
 
     implicit val functor: Functor[Calc] = new Functor[Calc] {
       override def map[A, B](fa: Calc[A])(f: A => B): Calc[B] =
@@ -30,7 +31,7 @@ object Cata05Calc extends util.App {
     }
   }
 
-  import Calc.{Add, Mult, Num}
+  import Calc.{Add, Mul, Num}
 
   final implicit class FunctorSyntax[F[_]: Functor, A](private val fa: F[A]) {
     def map[B](f: A => B): F[B] =
@@ -47,7 +48,7 @@ object Cata05Calc extends util.App {
 
   // 3 * (1 + 2)
   val calc2: Fix[Calc] =
-    Fix(Mult(
+    Fix(Mul(
         Fix(Num[Fix[Calc]](3)),
         Fix(Add(
             Fix(Num[Fix[Calc]](1)),
@@ -57,15 +58,15 @@ object Cata05Calc extends util.App {
   // FORMAT: ON
 
   val eval: Calc[Int] => Int = {
-    case Num(i)     => i
-    case Add(a, b)  => a + b
-    case Mult(a, b) => a * b
+    case Num(i)    => i
+    case Add(a, b) => a + b
+    case Mul(a, b) => a * b
   }
 
   val show: Calc[String] => String = {
-    case Num(i)     => i.toString
-    case Add(a, b)  => s"($a + $b)"
-    case Mult(a, b) => s"$a * $b"
+    case Num(i)    => i.toString
+    case Add(a, b) => s"($a + $b)"
+    case Mul(a, b) => s"$a * $b"
   }
 
   def collapseFA2A[F[_]: Functor, A](fa2a: F[A] => A)(fixedData: Fix[F]): A = {

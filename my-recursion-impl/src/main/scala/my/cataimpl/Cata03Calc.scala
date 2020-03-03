@@ -1,4 +1,5 @@
-package my.cataimpl
+package my
+package cataimpl
 
 import scala.util.chaining._
 import fixpoint.Fix
@@ -7,12 +8,12 @@ object Cata03Calc extends util.App {
 
   sealed trait Calc[+A] extends Product with Serializable
   object Calc {
-    case class Num[A](i: Int)      extends Calc[A]
-    case class Add[A](a: A, b: A)  extends Calc[A]
-    case class Mult[A](a: A, b: A) extends Calc[A]
+    case class Num[A](i: Int)     extends Calc[A]
+    case class Add[A](a: A, b: A) extends Calc[A]
+    case class Mul[A](a: A, b: A) extends Calc[A]
   }
 
-  import Calc.{Add, Mult, Num}
+  import Calc.{Add, Mul, Num}
 
   // FORMAT: OFF
   // 1 + 2
@@ -24,7 +25,7 @@ object Cata03Calc extends util.App {
 
   // 3 * (1 + 2)
   val calc2: Fix[Calc] =
-    Fix(Mult(
+    Fix(Mul(
         Fix(Num[Fix[Calc]](3)),
         Fix(Add(
             Fix(Num[Fix[Calc]](1)),
@@ -35,16 +36,16 @@ object Cata03Calc extends util.App {
 
   val eval: Fix[Calc] => Int =
     _.unfix match {
-      case Num(i)     => i
-      case Add(a, b)  => eval(a) + eval(b)
-      case Mult(a, b) => eval(a) * eval(b)
+      case Num(i)    => i
+      case Add(a, b) => eval(a) + eval(b)
+      case Mul(a, b) => eval(a) * eval(b)
     }
 
   val show: Fix[Calc] => String =
     _.unfix match {
-      case Num(i)     => i.toString
-      case Add(a, b)  => s"(${show(a)} + ${show(b)})"
-      case Mult(a, b) => s"${show(a)} * ${show(b)}"
+      case Num(i)    => i.toString
+      case Add(a, b) => s"(${show(a)} + ${show(b)})"
+      case Mul(a, b) => s"${show(a)} * ${show(b)}"
     }
 
   println

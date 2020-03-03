@@ -1,4 +1,5 @@
-package my.cataimpl
+package my
+package cataimpl
 
 import scala.util.chaining._
 import fixpoint.Fix
@@ -9,13 +10,13 @@ object Cata09Calc extends util.App {
 
   sealed trait Calc[+A] extends Product with Serializable {
 
-    import Calc.{Add, Mult, Num}
+    import Calc.{Add, Mul, Num}
 
     def map[B](f: A => B): Calc[B] =
       this match {
-        case Num(i)     => Num(i)
-        case Add(a, b)  => Add(f(a), f(b))
-        case Mult(a, b) => Mult(f(a), f(b))
+        case Num(i)    => Num(i)
+        case Add(a, b) => Add(f(a), f(b))
+        case Mul(a, b) => Mul(f(a), f(b))
       }
 
     def fix: Fix[Calc] = Calc.fix(this)
@@ -23,9 +24,9 @@ object Cata09Calc extends util.App {
 
   object Calc {
 
-    case class Num[A](i: Int)      extends Calc[A]
-    case class Add[A](a: A, b: A)  extends Calc[A]
-    case class Mult[A](a: A, b: A) extends Calc[A]
+    case class Num[A](i: Int)     extends Calc[A]
+    case class Add[A](a: A, b: A) extends Calc[A]
+    case class Mul[A](a: A, b: A) extends Calc[A]
 
     implicit val functor: Functor[Calc] = new Functor[Calc] {
       override def map[A, B](fa: Calc[A])(f: A => B): Calc[B] =
@@ -40,12 +41,12 @@ object Cata09Calc extends util.App {
         Fix(Num[Fix[Calc]](i)) // needs type param for type inference
       case Add(a, b) =>
         Fix(Add(fixA(a), fixA(b)))
-      case Mult(a, b) =>
-        Fix(Mult(fixA(a), fixA(b)))
+      case Mul(a, b) =>
+        Fix(Mul(fixA(a), fixA(b)))
     }
   }
 
-  import Calc.{Add, Mult, Num}
+  import Calc.{Add, Mul, Num}
 
   // 1 + 2
   val calc1 =
@@ -54,19 +55,19 @@ object Cata09Calc extends util.App {
 
   // 3 * (1 + 2)
   val calc2 =
-    Mult(Num(3), Add(Num(1), Num(2)))
+    Mul(Num(3), Add(Num(1), Num(2)))
       .tap(println)
 
   val eval: Algebra[Calc, Int] = {
-    case Num(i)     => i
-    case Add(a, b)  => a + b
-    case Mult(a, b) => a * b
+    case Num(i)    => i
+    case Add(a, b) => a + b
+    case Mul(a, b) => a * b
   }
 
   val show: Algebra[Calc, String] = {
-    case Num(i)     => i.toString
-    case Add(a, b)  => s"($a + $b)"
-    case Mult(a, b) => s"$a * $b"
+    case Num(i)    => i.toString
+    case Add(a, b) => s"($a + $b)"
+    case Mul(a, b) => s"$a * $b"
   }
 
   println
