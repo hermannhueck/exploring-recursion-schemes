@@ -2,77 +2,54 @@ package my
 package cataimpl
 
 import scala.util.chaining._
-import fixpoint.Fix
-import functor._
 import recursion._
 
+/*
+  In step 10 we added the implicit class CataSyntax to recursion/package.scala.
+
+    final implicit class CataSyntax[F[_]: Functor](private val fix: Fix[F]) {
+      @inline def cata[A](algebra: Algebra[F, A]): A =
+        self.cata(algebra)(fix)
+    }
+
+  Instead of:
+
+    cata(eval)(calc2.fix)
+
+  we can invoke cata directly on a Fix structure:
+
+    calc2.fix.cata(eval)
+
+  Now we can invoke our catamorphism conveniently:
+  - We have a nested CalcF structure.
+  - We then recursivly nest it int Fix invoking the 'fix' function on it.
+  - Now we can invoke 'cata' on the Fix passing the 'eval' Algebra.
+  - The hole expression gives us the Int result of the the evaluation of the original expression.
+ */
 object Cata10Calc extends util.App {
 
-  sealed trait Calc[+A] extends Product with Serializable {
-
-    import Calc.{Add, Mul, Num}
-
-    def map[B](f: A => B): Calc[B] =
-      this match {
-        case Num(i)    => Num(i)
-        case Add(a, b) => Add(f(a), f(b))
-        case Mul(a, b) => Mul(f(a), f(b))
-      }
-
-    def fix: Fix[Calc] = Calc.fix(this)
-  }
-
-  object Calc {
-
-    case class Num[A](i: Int)     extends Calc[A]
-    case class Add[A](a: A, b: A) extends Calc[A]
-    case class Mul[A](a: A, b: A) extends Calc[A]
-
-    implicit val functor: Functor[Calc] = new Functor[Calc] {
-      override def map[A, B](fa: Calc[A])(f: A => B): Calc[B] =
-        fa map f
-    }
-
-    private def fixA[A](a: A): Fix[Calc] =
-      fix apply a.asInstanceOf[Calc[A]]
-
-    def fix[A]: Calc[A] => Fix[Calc] = {
-      case Num(i) =>
-        Fix(Num[Fix[Calc]](i)) // needs type param for type inference
-      case Add(a, b) =>
-        Fix(Add(fixA(a), fixA(b)))
-      case Mul(a, b) =>
-        Fix(Mul(fixA(a), fixA(b)))
-    }
-  }
-
-  import Calc.{Add, Mul, Num}
+  import CalcF._
 
   // 1 + 2
   val calc1 =
-    Add(Num(1), Num(2))
+    AddF(NumF(1), NumF(2))
       .tap(println)
 
   // 3 * (1 + 2)
   val calc2 =
-    Mul(Num(3), Add(Num(1), Num(2)))
+    MulF(NumF(3), AddF(NumF(1), NumF(2)))
       .tap(println)
 
-  val eval: Algebra[Calc, Int] = {
-    case Num(i)    => i
-    case Add(a, b) => a + b
-    case Mul(a, b) => a * b
+  val eval: Algebra[CalcF, Int] = {
+    case NumF(i)    => i
+    case AddF(a, b) => a + b
+    case MulF(a, b) => a * b
   }
 
-  val show: Algebra[Calc, String] = {
-    case Num(i)    => i.toString
-    case Add(a, b) => s"($a + $b)"
-    case Mul(a, b) => s"$a * $b"
-  }
-
-  final implicit class FixCalcSyntax(private val fix: Fix[Calc]) {
-    @inline def cata[A](algebra: Algebra[Calc, A]): A =
-      recursion.cata(algebra)(fix)
+  val show: Algebra[CalcF, String] = {
+    case NumF(i)    => i.toString
+    case AddF(a, b) => s"($a + $b)"
+    case MulF(a, b) => s"$a * $b"
   }
 
   println

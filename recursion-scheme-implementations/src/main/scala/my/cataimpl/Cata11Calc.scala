@@ -2,78 +2,70 @@ package my
 package cataimpl
 
 import scala.util.chaining._
-import fixpoint.Fix
-import functor._
 import recursion._
 
+/*
+  From step 2 to step 10 we worked with CalcF[+A] in order to be able to define
+  a Pattern Functor and extract recursion based on that.
+
+  Wouldn't it be nice to use our original Calc from step 1 again?
+
+  Let's just implement a conversion function Calc => CalcF[A] in the cataimpl package object.
+
+    def calc2CalcF[A]: Calc => CalcF[A] = ???
+
+  The extension method 'toCalcF' can be invoked directly on a Calc instance:
+
+    final implicit class CalcSyntax(calc: Calc) {
+      def toCalcF[A]: CalcF[A] = calc2CalcF(calc)
+    }
+
+    val calc2: Calc =
+      Mul(Num(3), Add(Num(1), Num(2)))
+        .tap(println)
+    val calc2F: CalcF[CalcF[CalcF[Nothing]]] =
+      calc2.toCalcF
+
+ */
 object Cata11Calc extends util.App {
 
-  sealed trait Calc[+A] extends Product with Serializable {
-
-    import Calc.{Add, Mul, Num}
-
-    def map[B](f: A => B): Calc[B] =
-      this match {
-        case Num(i)    => Num(i)
-        case Add(a, b) => Add(f(a), f(b))
-        case Mul(a, b) => Mul(f(a), f(b))
-      }
-
-    def fix: Fix[Calc] = Calc.fix(this)
-  }
-
-  object Calc {
-
-    case class Num[A](i: Int)     extends Calc[A]
-    case class Add[A](a: A, b: A) extends Calc[A]
-    case class Mul[A](a: A, b: A) extends Calc[A]
-
-    implicit val functor: Functor[Calc] = new Functor[Calc] {
-      override def map[A, B](fa: Calc[A])(f: A => B): Calc[B] =
-        fa map f
-    }
-
-    private def fixA[A](a: A): Fix[Calc] =
-      fix apply a.asInstanceOf[Calc[A]]
-
-    def fix[A]: Calc[A] => Fix[Calc] = {
-      case Num(i) =>
-        Fix(Num[Fix[Calc]](i)) // needs type param for type inference
-      case Add(a, b) =>
-        Fix(Add(fixA(a), fixA(b)))
-      case Mul(a, b) =>
-        Fix(Mul(fixA(a), fixA(b)))
-    }
-  }
-
-  import Calc.{Add, Mul, Num}
+  import Calc._
+  import CalcF._
 
   // 1 + 2
-  val calc1 =
+  val calc1: Calc =
     Add(Num(1), Num(2))
+      .tap(println)
+  val calc1F: CalcF[CalcF[Nothing]] =
+    calc1
+      .toCalcF
       .tap(println)
 
   // 3 * (1 + 2)
-  val calc2 =
+  val calc2: Calc =
     Mul(Num(3), Add(Num(1), Num(2)))
       .tap(println)
+  val calc2F: CalcF[CalcF[CalcF[Nothing]]] =
+    calc2
+      .toCalcF
+      .tap(println)
 
-  val eval: Algebra[Calc, Int] = {
-    case Num(i)    => i
-    case Add(a, b) => a + b
-    case Mul(a, b) => a * b
+  val eval: Algebra[CalcF, Int] = {
+    case NumF(i)    => i
+    case AddF(a, b) => a + b
+    case MulF(a, b) => a * b
   }
 
-  val show: Algebra[Calc, String] = {
-    case Num(i)    => i.toString
-    case Add(a, b) => s"($a + $b)"
-    case Mul(a, b) => s"$a * $b"
+  val show: Algebra[CalcF, String] = {
+    case NumF(i)    => i.toString
+    case AddF(a, b) => s"($a + $b)"
+    case MulF(a, b) => s"$a * $b"
   }
 
   println
-  calc1.fix.cata(show) pipe (str => println(s"show: $str"))
-  calc1.fix.cata(eval) pipe (res => println(s"eval: $res"))
+  calc1F.fix.cata(show) pipe (str => println(s"show: $str"))
+  calc1F.fix.cata(eval) pipe (res => println(s"eval: $res"))
   println
-  calc2.fix.cata(show) pipe (str => println(s"show: $str"))
-  calc2.fix.cata(eval) pipe (res => println(s"eval: $res"))
+  calc2F.fix.cata(show) pipe (str => println(s"show: $str"))
+  calc2F.fix.cata(eval) pipe (res => println(s"eval: $res"))
 }
