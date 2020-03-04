@@ -9,6 +9,8 @@ import recursion._
 
   In step 0 we move them out into the my.recursion package object.
 
+  Our 2 Algebras eval and show are moved to the CalcF companion object.
+
   We also move the CalcF trait and companion object into it's own file.
  */
 object Cata09Calc extends util.App {
@@ -24,18 +26,6 @@ object Cata09Calc extends util.App {
   val calc2 =
     MulF(NumF(3), AddF(NumF(1), NumF(2)))
       .tap(println)
-
-  val eval: Algebra[CalcF, Int] = {
-    case NumF(i)    => i
-    case AddF(a, b) => a + b
-    case MulF(a, b) => a * b
-  }
-
-  val show: Algebra[CalcF, String] = {
-    case NumF(i)    => i.toString
-    case AddF(a, b) => s"($a + $b)"
-    case MulF(a, b) => s"$a * $b"
-  }
 
   println
   cata(show)(CalcF.fix(calc1)) pipe (str => println(s"show: $str"))

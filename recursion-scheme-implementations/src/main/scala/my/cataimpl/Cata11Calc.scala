@@ -50,18 +50,6 @@ object Cata11Calc extends util.App {
       .toCalcF
       .tap(println)
 
-  val eval: Algebra[CalcF, Int] = {
-    case NumF(i)    => i
-    case AddF(a, b) => a + b
-    case MulF(a, b) => a * b
-  }
-
-  val show: Algebra[CalcF, String] = {
-    case NumF(i)    => i.toString
-    case AddF(a, b) => s"($a + $b)"
-    case MulF(a, b) => s"$a * $b"
-  }
-
   println
   calc1F.fix.cata(show) pipe (str => println(s"show: $str"))
   calc1F.fix.cata(eval) pipe (res => println(s"eval: $res"))
