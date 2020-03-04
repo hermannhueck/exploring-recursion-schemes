@@ -8,6 +8,9 @@ import recursion._
   With the Calc => CalcF[A] conversion of step 11 we can further simplify our code:
   We move the invocation of toCalcF to our final invocation chain:
 
+    val calc2: Calc = Mul(Num(3), Add(Num(1), Num(2)))
+
+    val res: Int = calc1.toCalcF.fix.cata(eval) // 9
  */
 object Cata12Calc extends util.App {
 

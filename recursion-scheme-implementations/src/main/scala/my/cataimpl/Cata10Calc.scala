@@ -22,9 +22,9 @@ import recursion._
 
   Now we can invoke our catamorphism conveniently:
   - We have a nested CalcF structure.
-  - We then recursivly nest it int Fix invoking the 'fix' function on it.
+  - We then recursivly nest it in Fix invoking the 'fix' function on it.
   - Now we can invoke 'cata' on the Fix passing the 'eval' Algebra.
-  - The hole expression gives us the Int result of the the evaluation of the original expression.
+  - The hole expression gives us an Int result.
  */
 object Cata10Calc extends util.App {
 

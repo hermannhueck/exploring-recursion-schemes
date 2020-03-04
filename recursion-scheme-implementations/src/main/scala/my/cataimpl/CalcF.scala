@@ -43,26 +43,13 @@ object CalcF {
 
   import Calc._
 
-  def calc2CalcF[A]: Calc => CalcF[A] = {
-
-    final implicit class Syntax(c: CalcF[A]) {
-      def asA: A = c.asInstanceOf[A]
-    }
-
-    _ match {
-      case Num(i)    => NumF(i)
-      case Add(a, b) => AddF(calc2CalcF(a).asA, calc2CalcF(b).asA)
-      case Mul(a, b) => MulF(calc2CalcF(a).asA, calc2CalcF(b).asA)
-    }
-  }
-
   final implicit class CalcSyntax(calc: Calc) {
-    def toCalcF[A]: CalcF[A] = calc2CalcF(calc)
+    def toCalcF: CalcF[Calc] = calc2CalcF(calc)
   }
+
+  import recursion._
 
   // Algebras: F[A] => A
-
-  import recursion.Algebra
 
   val eval: Algebra[CalcF, Int] = {
     case NumF(i)    => i
@@ -77,9 +64,17 @@ object CalcF {
   }
 
   // another Algebra turns a CalcF[Calc] back to a Calc
-  def calcF2Calc: CalcF[Calc] => Calc = {
+  def calcF2Calc: Algebra[CalcF, Calc] = {
     case NumF(i)    => Num(i)
     case AddF(a, b) => Add(a, b)
     case MulF(a, b) => Mul(a, b)
+  }
+
+  // Coalgebras: A => F[A]
+
+  def calc2CalcF: Coalgebra[CalcF, Calc] = {
+    case Num(i)    => NumF(i)
+    case Add(a, b) => AddF(a, b)
+    case Mul(a, b) => MulF(a, b)
   }
 }

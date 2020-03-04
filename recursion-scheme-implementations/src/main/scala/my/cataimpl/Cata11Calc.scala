@@ -12,7 +12,15 @@ import recursion._
 
   Let's just implement a conversion function Calc => CalcF[A] in the cataimpl package object.
 
-    def calc2CalcF[A]: Calc => CalcF[A] = ???
+    def calc2CalcF[A]: Calc => CalcF[Calc] = ???
+
+  This could also be seen as a Coalgebra[CalcF, Calc]:
+
+    def calc2CalcF: Coalgebra[CalcF, Calc] = {
+      case Num(i)    => NumF(i)
+      case Add(a, b) => AddF(a, b)
+      case Mul(a, b) => MulF(a, b)
+    }
 
   The extension method 'toCalcF' can be invoked directly on a Calc instance:
 
@@ -36,7 +44,7 @@ object Cata11Calc extends util.App {
   val calc1: Calc =
     Add(Num(1), Num(2))
       .tap(println)
-  val calc1F: CalcF[CalcF[Nothing]] =
+  val calc1F =
     calc1
       .toCalcF
       .tap(println)
@@ -45,7 +53,7 @@ object Cata11Calc extends util.App {
   val calc2: Calc =
     Mul(Num(3), Add(Num(1), Num(2)))
       .tap(println)
-  val calc2F: CalcF[CalcF[CalcF[Nothing]]] =
+  val calc2F =
     calc2
       .toCalcF
       .tap(println)
