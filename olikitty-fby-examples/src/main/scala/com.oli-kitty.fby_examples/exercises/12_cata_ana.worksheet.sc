@@ -36,26 +36,20 @@ def ana[F[_]: Functor, S, A](f: (A) => F[A])(embed: F[S] => S): A => S =
   }
 
 def projectList[E]: List[E] => ListF[E, List[E]] = {
-  _ match {
-    case Nil          => None
-    case head :: tail => Some((head, tail))
-  }
+  case Nil          => None
+  case head :: tail => Some((head, tail))
 }
 
 def prodFlist: ListF[Int, Int] => Int = {
-  _ match {
-    case None         => 1
-    case Some((x, y)) => x * y
-  }
+  case None         => 1
+  case Some((x, y)) => x * y
 }
 
 val list = 5 :: 4 :: 1 :: Nil
 
 def embedList[E]: ListF[E, List[E]] => List[E] = {
-  _ match {
-    case None          => Nil
-    case Some((e, le)) => e :: le
-  }
+  case None          => Nil
+  case Some((e, le)) => e :: le
 }
 
 def range: Int => ListF[Int, Int] =

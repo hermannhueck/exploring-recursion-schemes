@@ -30,9 +30,9 @@ def product(i: Option[(Int, Int)]): Int = i match {
 def foldRight[A, E](op: Option[(E, A)] => A): List[E] => A = {
   new (List[E] => A) { self =>
 
-    val step1: List[E] => Option[(E, List[E])] = ??? // unpack
+    val step1: List[E] => Option[(E, List[E])]        = ??? // unpack/project
     val step2: Option[(E, List[E])] => Option[(E, A)] = ??? // recurse
-    val step3: Option[(E, A)] => A = ??? // compute
+    val step3: Option[(E, A)] => A                    = ??? // compute
 
     def apply(xs: List[E]): A = (step1 andThen step2 andThen step3)(xs)
   }
@@ -42,11 +42,11 @@ def foldRight[A, E](op: Option[(E, A)] => A): List[E] => A = {
 def foldRight2[A, E](op: Option[(E, A)] => A): List[E] => A = {
   new (List[E] => A) { self =>
 
-    val unpack: List[E] => Option[(E, List[E])] = ???
+    val project: List[E] => Option[(E, List[E])]        = ???
     val recurse: Option[(E, List[E])] => Option[(E, A)] = ???
-    val compute: Option[(E, A)] => A = op
+    val compute: Option[(E, A)] => A                    = op
 
-    def apply(xs: List[E]): A = (unpack andThen recurse andThen compute)(xs)
+    def apply(xs: List[E]): A = (project andThen recurse andThen compute)(xs)
   }
 }
 
@@ -54,17 +54,17 @@ def foldRight2[A, E](op: Option[(E, A)] => A): List[E] => A = {
 def foldRight3[A, E](op: Option[(E, A)] => A): List[E] => A = {
   new (List[E] => A) { self =>
 
-    val unpack: List[E] => Option[(E, List[E])] = {
+    val project: List[E] => Option[(E, List[E])] = {
       case Nil          => None
       case head :: tail => Some(head -> tail)
     }
     val recurse: Option[(E, List[E])] => Option[(E, A)] = {
       case None               => None
-      case Some(head -> tail) => Some(head -> self(tail))
+      case Some((head, tail)) => Some(head -> self(tail))
     }
     val compute: Option[(E, A)] => A = op
 
-    def apply(xs: List[E]): A = (unpack andThen recurse andThen compute)(xs)
+    def apply(xs: List[E]): A = (project andThen recurse andThen compute)(xs)
   }
 }
 
@@ -74,15 +74,15 @@ foldRight3(product)(list)
 def foldRight4[A, E](op: Option[(E, A)] => A): List[E] => A = {
   new (List[E] => A) { self =>
 
-    val unpack: List[E] => Option[(E, List[E])] = {
+    val project: List[E] => Option[(E, List[E])] = {
       case Nil          => None
       case head :: tail => Some(head -> tail)
     }
 
     val recurse: Option[(E, List[E])] => Option[(E, A)] =
-      opt => opt map { case head -> tail => head -> self(tail) }
+      opt => opt map { case (head, tail) => head -> self(tail) }
 
-    def apply(xs: List[E]): A = (unpack andThen recurse andThen op)(xs)
+    def apply(xs: List[E]): A = (project andThen recurse andThen op)(xs)
   }
 }
 

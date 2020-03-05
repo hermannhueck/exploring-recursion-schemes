@@ -11,10 +11,8 @@ type ListF[A, B] = Option[(A, B)]
 implicit def functor[A]: Functor[ListF[A, ?]] = Functor[Option].compose[(A, ?)]
 
 def embedList[E]: ListF[E, List[E]] => List[E] = {
-  _ match {
-    case None          => Nil
-    case Some((e, le)) => e :: le
-  }
+  case None          => Nil
+  case Some((e, le)) => e :: le
 }
 
 def range: Int => ListF[Int, Int] =

@@ -12,17 +12,17 @@ def range(x: Int): Option[(Int, Int)] = if (x > 0) Some((x, x - 1)) else None
   */
 def unfold0[E, B](f: B => Option[(E, B)]): B => List[E] = {
 
-  type F[P] = Option[(E, P)]
-  type S = List[E]
+  // type F[P] = Option[(E, P)]
+  // type S = List[E]
 
   new (B => List[E]) { self =>
 
     def compute: B => Option[(E, B)] = f
-    def recurse: Option[(E, B)] => Option[(E, List[E])] = _ match {
+    def recurse: Option[(E, B)] => Option[(E, List[E])] = {
       case None          => None
       case Some((x, xs)) => Some((x, self(xs)))
     }
-    def embed: Option[(E, List[E])] => List[E] = _ match {
+    def embed: Option[(E, List[E])] => List[E] = {
       case None          => Nil
       case Some((x, xs)) => x :: xs
     }
@@ -38,16 +38,16 @@ unfold0(range)(10)
 def unfold1[E, B](f: B => Option[(E, B)]): B => List[E] = {
 
   type F[P] = Option[(E, P)]
-  type S = List[E]
+  type S    = List[E]
 
   new (B => S) { self =>
 
     def compute: B => F[B] = f
-    def recurse: F[B] => F[S] = _ match {
+    def recurse: F[B] => F[S] = {
       case None          => None
       case Some((x, xs)) => Some((x, self(xs)))
     }
-    def embed: F[S] => S = _ match {
+    def embed: F[S] => S = {
       case None          => Nil
       case Some((x, xs)) => x :: xs
     }
@@ -63,15 +63,15 @@ unfold1(range)(10)
 def unfold2[E, B](f: B => Option[(E, B)]): B => List[E] = {
 
   type F[P] = Option[(E, P)]
-  type S = List[E]
+  type S    = List[E]
 
   implicit val F = Functor[Option].compose[(E, ?)]
 
   new (B => S) { self =>
 
-    def compute: B => F[B] = f
+    def compute: B => F[B]    = f
     def recurse: F[B] => F[S] = _.fmap(self)
-    def embed: F[S] => S = _ match {
+    def embed: F[S] => S = {
       case None          => Nil
       case Some((x, xs)) => x :: xs
     }
@@ -87,13 +87,13 @@ unfold2(range)(10)
 def unfold3[E, B](f: B => Option[(E, B)]): B => List[E] = {
 
   type F[P] = Option[(E, P)]
-  type S = List[E]
+  type S    = List[E]
 
   implicit val F = Functor[Option].compose[(E, ?)]
 
   new (B => S) { self =>
 
-    def embed: F[S] => S = _ match {
+    def embed: F[S] => S = {
       case None          => Nil
       case Some((x, xs)) => x :: xs
     }

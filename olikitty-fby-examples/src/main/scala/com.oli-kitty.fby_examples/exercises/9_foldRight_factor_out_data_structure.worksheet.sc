@@ -10,10 +10,8 @@ type ListF[A, B] = Option[(A, B)]
 implicit def functor[A]: Functor[ListF[A, ?]] = Functor[Option].compose[(A, ?)]
 
 def projectList[E]: List[E] => ListF[E, List[E]] = {
-  _ match {
-    case Nil          => None
-    case head :: tail => Some((head, tail))
-  }
+  case Nil          => None
+  case head :: tail => Some((head, tail))
 }
 
 // reimplement foldRight
@@ -24,10 +22,8 @@ def foldRight[F[_]: Functor, S, B](f: F[B] => B)(project: S => F[S]): S => B = {
 }
 
 def prodFlist: ListF[Int, Int] => Int = {
-  _ match {
-    case None         => 1
-    case Some((x, y)) => x * y
-  }
+  case None         => 1
+  case Some((x, y)) => x * y
 }
 
 val list = 5 :: 4 :: 1 :: Nil

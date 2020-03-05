@@ -11,7 +11,7 @@ implicit def functor[A]: Functor[ListF[A, ?]] = Functor[Option].compose[(A, ?)]
  * F[A] => A is often called Algebra in the category theory/recursion schemes literature,
  * and its dual A => F[A] is called Coalgebra. Let’s introduce aliases for these types:
  */
-type Algebra[F[_], A] = F[A] => A
+type Algebra[F[_], A]   = F[A] => A
 type Coalgebra[F[_], A] = A => F[A]
 
 // use Algebra and Coalgebra

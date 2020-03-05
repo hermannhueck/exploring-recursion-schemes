@@ -18,22 +18,18 @@ def product(i: Option[(Int, Int)]): Int = i match {
   */
 def foldRight[A, E](op: Option[(E, A)] => A): List[E] => A = {
 
-  type F[P] = Option[(E, P)]
-  type S = List[E]
+  // type F[P] = Option[(E, P)]
+  // type S = List[E]
 
   new (List[E] => A) { self =>
 
     def unpack: List[E] => Option[(E, List[E])] = {
-      _ match {
-        case Nil          => None
-        case head :: tail => Some((head, tail))
-      }
+      case Nil          => None
+      case head :: tail => Some((head, tail))
     }
     def recurse: Option[(E, List[E])] => Option[(E, A)] = {
-      _ match {
-        case None          => None
-        case Some((x, xs)) => Some((x, self(xs)))
-      }
+      case None          => None
+      case Some((x, xs)) => Some((x, self(xs)))
     }
     def compute: Option[(E, A)] => A = op
 
@@ -48,25 +44,21 @@ foldRight(product)(list)
 def foldRight1[A, E](op: Option[(E, A)] => A): List[E] => A = {
 
   type F[P] = Option[(E, P)]
-  type S = List[E]
+  type S    = List[E]
 
   new (S => A) { self =>
 
-    def unpack: S => F[S] = {
-      _ match {
-        case Nil          => None
-        case head :: tail => Some((head, tail))
-      }
+    def project: S => F[S] = {
+      case Nil          => None
+      case head :: tail => Some((head, tail))
     }
     def recurse: F[S] => F[A] = {
-      _ match {
-        case None          => None
-        case Some((x, xs)) => Some((x, self(xs)))
-      }
+      case None          => None
+      case Some((x, xs)) => Some((x, self(xs)))
     }
     def compute: F[A] => A = op
 
-    def apply(xs: List[E]): A = (unpack andThen recurse andThen compute)(xs)
+    def apply(xs: List[E]): A = (project andThen recurse andThen compute)(xs)
   }
 }
 
@@ -76,23 +68,21 @@ foldRight1(product)(list)
 def foldRight2[A, E](op: Option[(E, A)] => A): List[E] => A = {
 
   type F[P] = Option[(E, P)]
-  type S = List[E]
+  type S    = List[E]
 
   // composed Functor for Option of Pair
   implicit val F = Functor[Option].compose[(E, ?)]
 
   new (S => A) { self =>
 
-    def unpack: S => F[S] = {
-      _ match {
-        case Nil          => None
-        case head :: tail => Some((head, tail))
-      }
+    def project: S => F[S] = {
+      case Nil          => None
+      case head :: tail => Some((head, tail))
     }
     def recurse: F[S] => F[A] = _.fmap(self)
-    def compute: F[A] => A = op
+    def compute: F[A] => A    = op
 
-    def apply(xs: List[E]): A = (unpack andThen recurse andThen compute)(xs)
+    def apply(xs: List[E]): A = (project andThen recurse andThen compute)(xs)
   }
 }
 
@@ -102,21 +92,19 @@ foldRight2(product)(list)
 def foldRight3[A, E](op: Option[(E, A)] => A): List[E] => A = {
 
   type F[P] = Option[(E, P)]
-  type S = List[E]
+  type S    = List[E]
 
   // composed Functor for Option of Pair
   implicit val F = Functor[Option].compose[(E, ?)]
 
   new (S => A) { self =>
 
-    def unpack: S => F[S] = {
-      _ match {
-        case Nil          => None
-        case head :: tail => Some((head, tail))
-      }
+    def project: S => F[S] = {
+      case Nil          => None
+      case head :: tail => Some((head, tail))
     }
 
-    def apply(xs: List[E]): A = op(unpack(xs).fmap(self))
+    def apply(xs: List[E]): A = op(project(xs).fmap(self))
   }
 }
 
