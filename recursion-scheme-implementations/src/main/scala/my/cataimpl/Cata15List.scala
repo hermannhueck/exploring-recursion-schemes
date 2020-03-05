@@ -104,16 +104,6 @@ object Cata15List extends util.App {
     case class NilF[A]()                    extends ListF[A]
     case class ConsF[A](head: Int, tail: A) extends ListF[A]
 
-    // converts a List[Int] into a ListF[A]
-    def list2ListF[A]: List[Int] => ListF[A] = {
-      case Nil          => NilF()
-      case head :: tail => ConsF(head, tail.asInstanceOf[A])
-    }
-
-    final implicit class ListSyntax(li: List[Int]) {
-      def toListF[A]: ListF[A] = list2ListF(li)
-    }
-
     private def fixList[A](a: A): Fix[ListF] =
       fix apply a.asInstanceOf[List[Int]].toListF
 
@@ -132,6 +122,20 @@ object Cata15List extends util.App {
           case ConsF(head, tail) => ConsF(head, f(tail))
         }
     }
+
+    // ----- Coalgebras ----------
+
+    // converts a List[Int] into a ListF[A]
+    val list2ListF: List[Int] => ListF[List[Int]] = {
+      case Nil          => NilF()
+      case head :: tail => ConsF(head, tail)
+    }
+
+    final implicit class ListSyntax(li: List[Int]) {
+      def toListF: ListF[List[Int]] = list2ListF(li)
+    }
+
+    // ----- Algebras ----------
 
     val sumAlgebra: ListF[Int] => Int = {
       case NilF()            => 0

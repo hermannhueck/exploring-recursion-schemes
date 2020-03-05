@@ -64,7 +64,7 @@ object CalcF {
   }
 
   // another Algebra turns a CalcF[Calc] back to a Calc
-  def calcF2Calc: Algebra[CalcF, Calc] = {
+  val calcF2Calc: Algebra[CalcF, Calc] = {
     case NumF(i)    => Num(i)
     case AddF(a, b) => Add(a, b)
     case MulF(a, b) => Mul(a, b)
@@ -72,7 +72,7 @@ object CalcF {
 
   // Coalgebras: A => F[A]
 
-  def calc2CalcF: Coalgebra[CalcF, Calc] = {
+  val calc2CalcF: Coalgebra[CalcF, Calc] = {
     case Num(i)    => NumF(i)
     case Add(a, b) => AddF(a, b)
     case Mul(a, b) => MulF(a, b)

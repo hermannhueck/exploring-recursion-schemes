@@ -13,7 +13,7 @@ import matryoshka.implicits._
   We cannot use our own Functor definition my.functor.Functor.
   Matryoshka is based on Scalaz. Hence we have to define an Instance of scalaz.Functor[CalcF].
 
-  The structures Calc and CalcF con be resused.
+  The structures Calc and CalcF can be resused.
 
   We can create a Fix structure by invoking the extension method 'embed' on envery component
   of a nested CalcF:
